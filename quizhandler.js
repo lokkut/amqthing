@@ -17,6 +17,7 @@ const QuizEvents = {
     "quiz over": "OnQuizOver",
     "Spectate Game": "OnSpectate",
     "Join Game": "OnJoin",
+    "Room Settings Changed": "OnSettingsChanged"
 
 };
 
@@ -38,6 +39,7 @@ class Quiz {
         this.evNextVideoInfo = ue.addEvent( 'NextVideoInfo' );
         this.evAnswerResults = ue.addEvent( 'AnswerResults' );
         this.evQuizOver = ue.addEvent( 'QuizOver' );
+        this.evSettingsChanged = ue.addEvent( 'QuizSettingsChanged' );
 
         this.evJoined = ue.addEvent( 'JoinedGame' );
         this.evSpectate = ue.addEvent( 'SpectatingGame' );
@@ -50,12 +52,24 @@ class Quiz {
         this.totalSongCount;
     };
 
+    OnSettingsChanged( paylod ) {
+        this.evSettingsChanged.trigger( paylod );
+    }
+
+    videoReady( id ) {
+        this.bot.sendMessage( 'quiz', 'video ready', { songId: id } );
+    }
+
+    setReady( v )  {
+        this.bot.sendMessage( 'lobby', 'set ready', { ready: v } );
+    }
+
     toggleSkip( v ) {
-        this.bot.SendMessage( 'quiz', 'skip vote', { skipVote: v } );
+        this.bot.sendMessage( 'quiz', 'skip vote', { skipVote: v } );
     }
 
     OnJoin( payload ) {        
-        if( payload.response ) return this.evErrorJoining.trigger(payload.errorMsg);
+        if( payload.errorMsg ) return this.evErrorJoining.trigger(payload.errorMsg);
 
         this.spectators = [];
         payload.spectators.forEach( (spectator)=>{
@@ -65,7 +79,7 @@ class Quiz {
     }
 
     OnSpectate( payload ) {
-        if( payload.response ) return this.evErrorJoining.trigger(payload.errorMsg);
+        if( payload.errorMsg ) return this.evErrorJoining.trigger(payload.errorMsg);
 
         this.spectators = [];
         payload.spectators.forEach( (spectator)=>{
